@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gilded Road: Trade Calculator Layout</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent-gold: #d4af37;
+            --accent-red: #ef5350;
+            --accent-green: #66bb6a;
+            --input-bg: #2c2c2c;
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--bg-panel);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-gold);
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-left: 3px solid var(--accent-gold);
+            padding-left: 10px;
+        }
+
+        /* --- Grid Layouts --- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        /* --- Inputs & Controls --- */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .val-display {
+            color: var(--accent-gold);
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box; 
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-gold);
+            cursor: pointer;
+        }
+
+        .desc {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* --- Results Area --- */
+        .results-bar {
+            background-color: #000;
+            padding: 25px;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--accent-gold);
+        }
+
+        .res-box {
+            text-align: center;
+        }
+
+        .res-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .res-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .res-red { color: var(--accent-red); }
+        .res-green { color: var(--accent-green); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>The Gilded Road • Price Calculator</h1>
+
+    <div class="control-group" id="base-value-input" style="max-width: 300px; margin: 0 auto 40px auto;">
+        <label>Item Base Value (Gold)</label>
+        <input type="number" value="10" placeholder="e.g. 7 for Iron Ingot">
+        <div class="desc">The value listed in the Creation Kit or via 'getgoldvalue'</div>
+    </div>
+
+    <div class="grid-2">
+        <div class="section">
+            <h2>Buying Scenario</h2>
+            
+            <div class="control-group" id="buying-zone-select">
+                <label>Global Zone Multiplier</label>
+                <select>
+                    <option value="1.0">Neutral Zone (1.0x)</option>
+                    <option value="0.85">Minor Surplus (Whiterun Food) (0.85x)</option>
+                    <option value="0.7">Major Surplus (Markarth Ore) (0.7x)</option>
+                    <option value="0.5">Deep Surplus (Cheat/Test) (0.5x)</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="specific-buying-mult">
+                <label>Specific Item Multiplier</label>
+                <select>
+                    <option value="1.0">No Specific Rule (1.0x)</option>
+                    <option value="0.8">Common Item (0.8x)</option>
+                    <option value="0.6">Abundant Resource (0.6x)</option>
+                    <option value="0.3">Dirt Cheap / Trash (0.3x)</option>
+                </select>
+                <div class="desc">Specific overrides from CSV (e.g., TGR_MK_ReachFlora)</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Selling Scenario</h2>
+
+            <div class="control-group" id="selling-zone-select">
+                <label>Global Zone Multiplier</label>
+                <select>
+                    <option value="1.0">Neutral Zone (1.0x)</option>
+                    <option value="1.25">Minor Deficit (Solitude Raw) (1.25x)</option>
+                    <option value="1.5">Major Deficit (Markarth Food) (1.5x)</option>
+                    <option value="2.0">Critical Shortage (The North) (2.0x)</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="specific-selling-mult">
+                <label>Specific Item Multiplier</label>
+                <select>
+                    <option value="1.0">No Specific Rule (1.0x)</option>
+                    <option value="1.5">High Demand (1.5x)</option>
+                    <option value="2.0">Extreme Demand (2.0x)</option>
+                    <option value="3.0">Desperation (3.0x)</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="partner-mult">
+                <label>Trade Partner Bonus</label>
+                <select>
+                    <option value="1.0">None / General Merchant (1.0x)</option>
+                    <option value="1.1">Khajiit Caravan (Exotic) (1.1x)</option>
+                    <option value="1.15">Innkeeper (Food) (1.15x)</option>
+                    <option value="1.2">Blacksmith/Alchemist (1.2x)</option>
+                    <option value="1.25">Court Wizard (1.25x)</option>
+                </select>
+                <div class="desc">Bonus for selling to the correct specialist faction.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Vanilla Engine Settings & Player Stats</h2>
+        
+        <div class="grid-2">
+            <div>
+                <div class="control-group" id="lvl-slider">
+                    <label>Speech Level <span class="val-display">15</span></label>
+                    <input type="range" min="0" max="100" value="15">
+                </div>
+                
+                <div class="control-group" id="fBarterMax">
+                    <label>fBarterMax (Worst Price) <span class="val-display">3.3</span></label>
+                    <input type="range" min="1.0" max="5.0" step="0.1" value="3.3">
+                    <div class="desc">Price factor at Speech Level 0. (Vanilla: 3.3)</div>
+                </div>
+
+                <div class="control-group" id="fBarterMin">
+                    <label>fBarterMin (Best Price) <span class="val-display">2.0</span></label>
+                    <input type="range" min="0.1" max="3.0" step="0.1" value="2.0">
+                    <div class="desc">Price factor at Speech Level 100. (Vanilla: 2.0)</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="control-group" id="fBarterSellMax">
+                    <label>fBarterSellMax (Hard Cap) <span class="val-display">1.0</span></label>
+                    <input type="range" min="0.5" max="5.0" step="0.05" value="1.0">
+                    <div class="desc">Caps sell price at X times Base Value. Set to 3.0+ to fix capping issues.</div>
+                </div>
+
+                 <div class="control-group" id="fBarterBuyMin">
+                    <label>fBarterBuyMin (Advanced) <span class="val-display">--</span></label>
+                    <input type="range" disabled>
+                    <div class="desc">Disabled (Requires Engine Fixes/DLL override)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-bar">
+        <div class="res-box">
+            <span class="res-label">Estimated Buying Price</span>
+            <span class="res-value res-red" id="calculated-buy-price">--</span>
+        </div>
+        <div class="res-box">
+            <span class="res-label">Estimated Selling Price</span>
+            <span class="res-value res-green" id="calculated-sell-price">--</span>
+        </div>
+    </div>
+</div>
+<script src="./js/DBObjectFactory.js"></script>
+<script src="./js/CoreObjectFactory.js"></script>
+<script>
+
+        const { ipcRenderer } = require('electron');
+
+        ipcRenderer.on('init-configs', (event, data) => {
+            // We will overwrite your existing 'DB' variable with the loaded data
+            let DB = [];
+            console.log("Configs received from main.js:", data);
+            
+            // Assign the loaded JSON to our Database
+            //DB = data;
+
+            Object.entries(data).forEach(([key,value]) => DB.push({
+                "city":`${key}`,
+                "multipliers": value
+            }) );
+
+            DBInstance.setDB(DB);
+
+            //console.log(DBInstance.getDB());
+
+            init(); 
+        });
+
+        // Bind Sliders (Just add new IDs to this array)
+        const sliderIds = [
+            "lvl-slider",
+            "fBarterSellMax",
+            "fBarterMax",
+            "fBarterMin",
+            "fBarterBuyMin"
+        ];
+
+        // Update your init() function to clear old data
+        function init() {
+            initEventListeners();
+            populateGlobalZoneMultipliers();
+            populatePartnerDropdown();
+            initializeUIValues();
+            
+            // Set some defaults if data exists
+            //if (Object.keys(DB).length > 0) {
+                //updateBuyDropdown();
+                //updateSellDropdown();
+                //calculate();
+            //}
+        }
+
+</script>
+<script src="./js/calcPrices.js"></script>
+<script src="./js/populateDropdowns.js"></script>
+<script src="./js/eventListeners.js"></script>
+</body>
+</html>
