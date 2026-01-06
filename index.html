@@ -282,7 +282,7 @@
 
         const { ipcRenderer } = require('electron');
 
-        ipcRenderer.on('init-configs', (event, data) => {
+        /*ipcRenderer.on('init-configs', (event, data) => {
             // We will overwrite your existing 'DB' variable with the loaded data
             let DB = [];
             console.log("Configs received from main.js:", data);
@@ -300,7 +300,33 @@
             //console.log(DBInstance.getDB());
 
             init(); 
-        });
+        });*/
+
+        ipcRenderer.on('open-config-dialog', async (event) => {
+            // Invoke the main process handler we created in Step 1
+            const result = await ipcRenderer.invoke('open-config-folder');
+            let DB = [];
+
+            if (result && result.success) {
+                console.log("Configs loaded:", result.data);
+                Object.entries(result.data).forEach(([key,value]) => DB.push({
+                    "city":`${key}`,
+                    "multipliers": value
+                }) );
+                DBInstance.setDB(DB);
+                console.log(DBInstance.getDB());
+                init();
+
+                // Process the data
+                // processLoadedConfigs(result.data);
+            } else if (result && !result.success) {
+                console.error("Error loading files. ::", result);
+            } else {
+                //statusEl.textContent = "Selection cancelled.";
+                console.warn("Selection cancelled.");
+            }
+        })
+
 
         // Bind Sliders (Just add new IDs to this array)
         const sliderIds = [
@@ -317,13 +343,6 @@
             populateGlobalZoneMultipliers();
             populatePartnerDropdown();
             initializeUIValues();
-            
-            // Set some defaults if data exists
-            //if (Object.keys(DB).length > 0) {
-                //updateBuyDropdown();
-                //updateSellDropdown();
-                //calculate();
-            //}
         }
 
 </script>
